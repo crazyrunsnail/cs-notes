@@ -1,0 +1,21 @@
+*Personal CS study notes.*
+
+* TOC:
+
+** [[file:base+/][CS基础]]
+
+** [[file:lang+/][语言类]]
+
+*** [[file:lang+/java/][Java]]
+
+*** [[file:lang+/go/][Go]]
+
+*** [[file:lang+/ruby/][Ruby]]
+
+*** [[file:lang+/js/][JavaScript]]
+
+** [[file:db+/][数据库]]
+
+** [[file:middleware+/][中间件]]
+
+** [[file:others+/][其他]]
