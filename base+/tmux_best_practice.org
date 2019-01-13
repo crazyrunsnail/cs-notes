@@ -1,10 +1,10 @@
  =Tmux= 是一个能够多窗口管理命令行的工具, 相比于在 =Iterm2= 直接使用 ~M+T~ 来管理多窗口更加方便.
 *** 常用命令
-    ~prefix~ 是指进入 =Tmux= 后的命令前缀, 默认是 ~C-a~ 简称 =P=.
+    ~prefix~ 是指进入 =Tmux= 后的命令前缀, 默认是 ~C-b~ 简称 =P=.
 
 | Suffix                     | Result                                    |
 |----------------------------+-------------------------------------------|
-| s                          | 列出所有session列表, 使用方向移动或者展开 |
+| s                          | 列出所有session列表, 使用方向键移动或者展开    |
 | :new session [sessionname] | 新建seesion                               |
 | $                          | 重命名session name                        |
 | :kill-pane                 | 删除当前pane                              |
