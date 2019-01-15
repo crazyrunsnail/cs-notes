@@ -5,7 +5,7 @@
 | Suffix                     | Result                                    |
 |----------------------------+-------------------------------------------|
 | s                          | 列出所有session列表, 使用方向键移动或者展开    |
-| :new session [sessionname] | 新建seesion                               |
+| :new -t [sessionname]      | 新建seesion                               |
 | $                          | 重命名session name                        |
 | :kill-pane                 | 删除当前pane                              |
 | :kill-session -t           | 指定number \vert name, 删除session            |
