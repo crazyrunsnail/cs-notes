@@ -1,0 +1,73 @@
+* 关于Gitlab
+  简单来讲就可以自己搭建一个私有的 =GitHub=. 在企业中非常流行, 有很强的 CD, CI功能, 配置 =Jenkins= 非常好使, 是DevOps的居家利器.
+* 安装
+** 使用Docker安装
+   [[https://docs.gitlab.com/omnibus/docker/#configure-gitlab][Gitlab官方文档]]
+*** 运行命令
+    #+BEGIN_SRC shell
+       sudo docker run --detach \
+       --publish 443:443 --publish 80:80 --publish 22:22 \
+       --name gitlab \
+       --restart always \
+       --volume /data/gitlab/config:/etc/gitlab \
+       --volume /data/gitlab/logs:/var/log/gitlab \
+       --volume /data/gitlab/data:/var/opt/gitlab \
+       gitlab/gitlab-ce:latest
+     #+END_SRC
+*** 说明
+**** 端口:
+     可以随便换, 433是https的访问端口, 80是http的访问端口.
+**** 数据卷:
+     几个文件夹相当容易懂:
+***** =config= 是配置文件
+***** =logs= 是日志文件
+***** =data= 存放的是数据文件
+**** 有用的命令
+***** 进入容器
+      =docker exec -it gitlab bash=
+***** 查看日志
+      =docker logs -f gitlab=
+* 配置
+** smtp(邮箱服务)
+   =gitlab= 大量地使用到邮件通知, 重置密码, 设置SSH Key, 合并代码等.
+*** 使用 163 邮箱
+    注册邮箱, 进入邮箱后进行设 =smtp= 设置, 这里主要是使用生成授权码.
+*** 配置gitlab
+    编辑 =gitlab/config/gitlab.rb= 文件, 搜索 =smtp= 进行设置, 设置如下:
+    #+BEGIN_SRC yaml
+      gitlab_rails['smtp_enable'] = true
+      gitlab_rails['smtp_address'] = "smtp.163.com"
+      gitlab_rails['smtp_port'] = 25
+      gitlab_rails['smtp_user_name'] = "uniofun@163.com"
+      gitlab_rails['smtp_password'] = "xxxxx" # !!! 163使用的是 授权码
+      gitlab_rails['smtp_domain'] = "163.com"
+      gitlab_rails['smtp_authentication'] = "login"
+      gitlab_rails['smtp_enable_starttls_auto'] = true
+      gitlab_rails['smtp_tls'] = false
+    #+END_SRC
+    *注: =smtp_password= 使用的是授权码.*
+*** 可能遇到的问题
+     =gitlab= 的邮件发送使用了[[https://github.com/mperham/sidekiq][sidekiq]], 查看 =logs/sidekiq/current=, 可以查看到报错信息. 实操中遇到有:
+**** 535 Error: authentication failed
+     查看密码设置错误, 设置成了登录密码, 实际上应该是 /授权码/.
+**** 553 Mail from must equal authorized user
+     修改了 =gitlab.rb= 配置文件中的 =user["git_user_email"]=, 但网易的smtp的服务器要求发送地址和用户地址一致, 要使得 =gitlab.rb= 的下面两个配置保持一致:
+     #+BEGIN_SRC yaml
+        gitlab_rails['gitlab_email_from'] = "xxuser@163.com"
+        user["git_user_email"] = "xxuser@163.com"
+     #+END_SRC
+**** EOFError: end of file reached
+     检查 =smtp_port=, 如果是 =25=, 不要配置ssl相关配置. 查看: [[https://www.jianshu.com/p/af142a66d781][gitlab 邮箱配置后， 发邮件报错 EOFError: end of file reached]]
+     *更多可能出现错误: [[https://www.jianshu.com/p/3ff4c301a446][gitlab使用163邮箱向用户发送邮件]]*
+** 配置external_url
+   =external_url= 是一个非常重要的配置, 最直接体现在于邮件的内容里的链接上, 如果没有配置对, 链接是错误的.
+*** 80端口
+    如果 =gitlab= 对外提供的服务是 =80= 端口, 直接在 =gitlab.rb= 中填写 =external_url = 'http://your.domain.com'=, 直接写IP也是可以的.
+*** 非80端口
+    我的例子就是非80端口的, 直接将 =external_url= 成 =http://myip:port=, 重启 docker 后, 服务访问不了(使用域名好像不会有这个问题). 做了以下两个调整:
+**** 修改配置文件
+     在 =gitlab.rb= 中找到 =nginx['listen_port']= 修改成是想被访问的端口, 如 =18888=.
+     重启 docker 后, 进入容器后, 查看到容器nginx监听的端口变成了刚刚在 =gitlab= 配置的端口, 这说明 docker 的映射端口也需要修改.
+**** 修改docker映射口
+     需要先停掉docker: =docker stop gitlab=, 将本来映射是 =80:80= 的端口改成配置后的端口, 比如 =18888:18888= (宿主机和配置端口一致), 然后启动docker, 可以正常访问了.
+Have Fun!
