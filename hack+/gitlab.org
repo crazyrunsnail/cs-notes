@@ -1,3 +1,12 @@
+* 内容                                                                          :TOC:
+- [[#关于gitlab][关于Gitlab]]
+- [[#安装][安装]]
+  - [[#使用docker安装][使用Docker安装]]
+- [[#配置][配置]]
+  - [[#smtp邮箱服务][smtp(邮箱服务)]]
+  - [[#配置external_url][配置external_url]]
+  - [[#配置ssh][配置SSH]]
+
 * 关于Gitlab
   简单来讲就可以自己搭建一个私有的 =GitHub=. 在企业中非常流行, 有很强的 CD, CI功能, 配置 =Jenkins= 非常好使, 是DevOps的居家利器.
 * 安装
@@ -71,3 +80,14 @@
 **** 修改docker映射口
      需要先停掉docker: =docker stop gitlab=, 将本来映射是 =80:80= 的端口改成配置后的端口, 比如 =18888:18888= (宿主机和配置端口一致), 然后启动docker, 可以正常访问了.
 Have Fun!
+** 配置SSH
+   SSH主要用于使用验证, 默认的使用 =22= 端口. 如果需要变更SSH的端口, 与设置 =external_url= 相似:
+   1. 修改gitlab配置
+      修改 =gitlab= 中如下配置:
+      #+BEGIN_SRC yaml
+         gitlab_rails['gitlab_shell_ssh_port'] = 21386
+      #+END_SRC
+   2. 更改docker端口映射
+      #+BEGIN_SRC shell
+        docker run -p 21386:21386 --name gitlab
+      #+END_SRC
